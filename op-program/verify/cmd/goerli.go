@@ -15,8 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
-const agreedBlockTrailingDistance = 100
-
 func main() {
 	if len(os.Args) < 3 {
 		_, _ = fmt.Fprintln(os.Stderr, "Must specify L1 RPC URL and L2 RPC URL as arguments")
@@ -55,14 +53,7 @@ func Run(l1RpcUrl string, l1RpcKind string, l2RpcUrl string, l2OracleAddr common
 		return fmt.Errorf("create output oracle bindings: %w", err)
 	}
 
-	// Find L2 finalized head. This is far enough back that we know it's submitted to L1 and won't be re-orged
-	l2FinalizedHead, err := l2Client.BlockByNumber(ctx, big.NewInt(int64(rpc.FinalizedBlockNumber)))
-	if err != nil {
-		return fmt.Errorf("get l2 safe head: %w", err)
-	}
-	fmt.Printf("Found L2 finalized head number: %v hash: %v\n", l2FinalizedHead.NumberU64(), l2FinalizedHead.Hash())
-
-	// Find L1 finalized block. Can't be re-orged and must contain all batches for the L2 finalized block
+	// Find L1 finalized block. Can't be re-orged.
 	l1BlockNum := big.NewInt(int64(rpc.FinalizedBlockNumber))
 	l1HeadBlock, err := l1Client.BlockByNumber(ctx, l1BlockNum)
 	if err != nil {
@@ -70,65 +61,32 @@ func Run(l1RpcUrl string, l1RpcKind string, l2RpcUrl string, l2OracleAddr common
 	}
 	fmt.Printf("Found l1 head block number: %v hash: %v\n", l1HeadBlock.NumberU64(), l1HeadBlock.Hash())
 
-	// Get the most published L2 output from before the finalized block
-	callOpts := &bind.CallOpts{Context: ctx}
-	outputIndex, err := outputOracle.GetL2OutputIndexAfter(callOpts, l2FinalizedHead.Number())
+	l1CallOpts := &bind.CallOpts{Context: ctx, BlockNumber: l1BlockNum}
+
+	// Find the latest output root published in this finalized block
+	latestOutputIndex, err := outputOracle.LatestOutputIndex(l1CallOpts)
 	if err != nil {
-		fmt.Println("Failed to get output index after finalized block. Checking latest output", "finalized", l2FinalizedHead.Number(), "err", err)
-		outputIndex, err = outputOracle.LatestOutputIndex(callOpts)
-		if err != nil {
-			return fmt.Errorf("get latest output index: %w", err)
-		}
-	} else {
-		outputIndex = outputIndex.Sub(outputIndex, big.NewInt(1))
+		return fmt.Errorf("fetch latest output index: %w", err)
 	}
-	output, err := outputOracle.GetL2Output(callOpts, outputIndex)
+	output, err := outputOracle.GetL2Output(l1CallOpts, latestOutputIndex)
 	if err != nil {
-		return fmt.Errorf("retrieve latest output: %w", err)
-	}
-	// Check we wound up with an output prior to the finalized block
-	if output.L2BlockNumber.Uint64() > l2FinalizedHead.NumberU64() {
-		return fmt.Errorf("selected output is after finalized head output block: %v, finalized block: %v", output.L2BlockNumber.Uint64(), l2FinalizedHead.NumberU64())
+		return fmt.Errorf("fetch l2 output %v: %w", latestOutputIndex, err)
 	}
 
-	l1Head := l1HeadBlock.Hash()
-	l2Claim := common.Hash(output.OutputRoot)
-	l2BlockNumber := output.L2BlockNumber
-
-	// Use an agreed starting L2 block some distance before the block the output claim is from
-	agreedBlockNumber := uint64(0)
-	if l2BlockNumber.Uint64() > agreedBlockTrailingDistance {
-		agreedBlockNumber = l2BlockNumber.Uint64() - agreedBlockTrailingDistance
-	}
-	l2AgreedBlock, err := l2Client.BlockByNumber(ctx, big.NewInt(int64(agreedBlockNumber)))
+	// Use the previous output as the agreed starting point
+	agreedOutput, err := outputOracle.GetL2Output(l1CallOpts, new(big.Int).Sub(latestOutputIndex, common.Big1))
 	if err != nil {
-		return fmt.Errorf("retrieve agreed l2 block: %w", err)
-	}
-	agreedOutputIndex, err := outputOracle.GetL2OutputIndexAfter(callOpts, l2AgreedBlock.Number())
-	if err != nil {
-		return fmt.Errorf("failed to output index after agreed block")
-	}
-	// Find an output that differs from what is being claimed
-	var agreedOutput bindings.TypesOutputProposal
-	for {
-		agreedOutput, err = outputOracle.GetL2Output(callOpts, agreedOutputIndex)
-		if err != nil {
-			return fmt.Errorf("retrieve agreed output: %w", err)
-		}
-		if agreedOutput.OutputRoot != output.OutputRoot {
-			break
-		}
-		fmt.Printf("Output at %v equals output at finalized block. Continuing search...\n", agreedOutput.L2BlockNumber)
-		agreedOutputIndex.Sub(agreedOutputIndex, big.NewInt(1))
-		if agreedOutputIndex.Int64() < 0 {
-			return fmt.Errorf("failed to find an output different from finalized block output")
-		}
+		return fmt.Errorf("fetch l2 output before %v: %w", latestOutputIndex, err)
 	}
 	l2BlockAtOutput, err := l2Client.BlockByNumber(ctx, agreedOutput.L2BlockNumber)
 	if err != nil {
 		return fmt.Errorf("retrieve agreed block: %w", err)
 	}
+
 	l2Head := l2BlockAtOutput.Hash()
+	l2BlockNumber := output.L2BlockNumber
+	l2Claim := common.Hash(output.OutputRoot)
+	l1Head := l1HeadBlock.Hash()
 
 	temp, err := os.MkdirTemp("", "oracledata")
 	if err != nil {
