@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"math/big"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/ethereum-optimism/optimism/op-bindings/bindings"
@@ -16,25 +19,31 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 3 {
-		_, _ = fmt.Fprintln(os.Stderr, "Must specify L1 RPC URL and L2 RPC URL as arguments")
+	var l1RpcUrl string
+	var l1RpcKind string
+	var l2RpcUrl string
+	var dataDir string
+	flag.StringVar(&l1RpcUrl, "l1", "", "L1 RPC URL to use")
+	flag.StringVar(&l1RpcKind, "l1-rpckind", "alchemy", "L1 RPC kind")
+	flag.StringVar(&l2RpcUrl, "l2", "", "L2 RPC URL to use")
+	flag.StringVar(&dataDir, "datadir", "",
+		"Directory to use for storing pre-images. If not set a temporary directory will be used.")
+	flag.Parse()
+
+	if l1RpcUrl == "" || l2RpcUrl == "" {
+		_, _ = fmt.Fprintln(os.Stderr, "Must specify --l1 and --l2 RPC URLs")
 		os.Exit(2)
 	}
-	l1RpcUrl := os.Args[1]
-	l2RpcUrl := os.Args[2]
-	l1RpcKind := "alchemy"
-	if len(os.Args) > 3 {
-		l1RpcKind = os.Args[3]
-	}
+
 	goerliOutputAddress := common.HexToAddress("0xE6Dfba0953616Bacab0c9A8ecb3a9BBa77FC15c0")
-	err := Run(l1RpcUrl, l1RpcKind, l2RpcUrl, goerliOutputAddress)
+	err := Run(l1RpcUrl, l1RpcKind, l2RpcUrl, goerliOutputAddress, dataDir)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Failed: %v\n", err.Error())
 		os.Exit(1)
 	}
 }
 
-func Run(l1RpcUrl string, l1RpcKind string, l2RpcUrl string, l2OracleAddr common.Address) error {
+func Run(l1RpcUrl string, l1RpcKind string, l2RpcUrl string, l2OracleAddr common.Address, dataDir string) error {
 	ctx := context.Background()
 	l1RpcClient, err := rpc.Dial(l1RpcUrl)
 	if err != nil {
@@ -88,29 +97,41 @@ func Run(l1RpcUrl string, l1RpcKind string, l2RpcUrl string, l2OracleAddr common
 	l2Claim := common.Hash(output.OutputRoot)
 	l1Head := l1HeadBlock.Hash()
 
-	temp, err := os.MkdirTemp("", "oracledata")
-	if err != nil {
-		return fmt.Errorf("create temp dir: %w", err)
-	}
-	defer func() {
-		err := os.RemoveAll(temp)
+	if dataDir == "" {
+		dataDir, err := os.MkdirTemp("", "oracledata")
 		if err != nil {
-			fmt.Println("Failed to remove temp dir:" + err.Error())
+			return fmt.Errorf("create temp dir: %w", err)
 		}
-	}()
-	fmt.Printf("Using temp dir: %s\n", temp)
+		defer func() {
+			err := os.RemoveAll(dataDir)
+			if err != nil {
+				fmt.Println("Failed to remove temp dir:" + err.Error())
+			}
+		}()
+	} else {
+		if err := os.MkdirAll(dataDir, 0755); err != nil {
+			fmt.Printf("Could not create data directory %v: %v", dataDir, err)
+			os.Exit(1)
+		}
+	}
+	fmt.Printf("Using dir: %s\n", dataDir)
 	args := []string{
 		"--log.level", "DEBUG",
 		"--network", "goerli",
 		"--exec", "./bin/op-program-client",
-		"--datadir", temp,
+		"--datadir", dataDir,
 		"--l1.head", l1Head.Hex(),
 		"--l2.head", l2Head.Hex(),
 		"--l2.outputroot", common.Bytes2Hex(agreedOutput.OutputRoot[:]),
 		"--l2.claim", l2Claim.Hex(),
 		"--l2.blocknumber", l2BlockNumber.String(),
 	}
-	fmt.Printf("Configuration: %s\n", args)
+	argsStr := strings.Join(args, " ")
+	if err := os.WriteFile(filepath.Join(dataDir, "args.txt"), []byte(argsStr), 0644); err != nil {
+		fmt.Printf("Could not write args: %v", err)
+		os.Exit(1)
+	}
+	fmt.Printf("Configuration: %s\n", argsStr)
 	fmt.Println("Running in online mode")
 	err = runFaultProofProgram(ctx, append(args, "--l1", l1RpcUrl, "--l2", l2RpcUrl, "--l1.rpckind", l1RpcKind))
 	if err != nil {

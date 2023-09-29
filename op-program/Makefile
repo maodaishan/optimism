@@ -25,7 +25,7 @@ op-program-client-mips:
 	# result is mips32, big endian, R3000
 
 clean:
-	rm -rf bin
+	rm -rf bin temp/compat
 
 test:
 	go test -v ./...
@@ -34,7 +34,17 @@ lint:
 	golangci-lint run -E goimports,sqlclosecheck,bodyclose,asciicheck,misspell,errorlint --timeout 5m -e "errors.As" -e "errors.Is" ./...
 
 verify-goerli: op-program-host op-program-client
-	env GO111MODULE=on go run ./verify/cmd/goerli.go $$L1URL $$L2URL
+	env GO111MODULE=on go run ./verify/cmd/goerli.go --l1 $$L1URL --l2 $$L2URL
+
+capture-goerli-verify: op-program-host op-program-client
+	rm -rf temp/compat/goerli compat-tests/goerli.tar.bz
+	env GO111MODULE=on go run ./verify/cmd/goerli.go --l1 $$L1URL --l2 $$L2URL --datadir temp/compat/goerli
+	tar jcf compat-tests/goerli.tar.bz -C temp/compat goerli
+
+run-goerli-verify: op-program-host op-program-client
+	mkdir -p temp/compat
+	tar jxf compat-tests/goerli.tar.bz -C temp/compat
+	./bin/op-program `cat temp/compat/goerli/args.txt`
 
 .PHONY: \
 	op-program \
