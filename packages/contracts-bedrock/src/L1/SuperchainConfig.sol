@@ -174,32 +174,24 @@ contract SuperchainConfig is Initializable, ISemver {
         paused_ = Storage.getUint(PAUSED_TIME_SLOT);
     }
 
-    /// @notice Pauses withdrawals.
+    /// @notice Pauses withdrawals by the specified duration.
+    ///         If already paused, the end of the pause period will be delayed by the specified duration.
     /// @param duration The duration of the pause.
     /// @param identifier (Optional) A string to identify provenance of the pause transaction.
     function pause(uint256 duration, string memory identifier) external {
         require(msg.sender == guardian(), "SuperchainConfig: only guardian can pause");
-        require(paused() == false, "SuperchainConfig: system is already paused");
         require(duration <= Storage.getUint(MAX_PAUSE_SLOT), "SuperchainConfig: duration exceeds maxPause");
 
-        Storage.setUint(PAUSED_TIME_SLOT, uint256(block.timestamp) + duration);
-        emit Paused(duration, identifier);
-    }
+        if (paused() == false) {
+            Storage.setUint(PAUSED_TIME_SLOT, uint256(block.timestamp) + duration);
+            emit Paused(duration, identifier);
+        } else {
+            uint256 currentPausedUntil = Storage.getUint(PAUSED_TIME_SLOT);
+            uint256 newPausedUntil = currentPausedUntil + duration;
 
-    /// @notice Extends the pause on withdrawals. The pause must already be active. The end of the
-    ///         pause period will be extended by the specified duration.
-    /// @param duration The amount of additional time for which the pause will be extended.
-    /// @param identifier (Optional) A string to identify provenance of the pause transaction.
-    function extendPause(uint256 duration, string memory identifier) external {
-        require(msg.sender == guardian(), "SuperchainConfig: only guardian can extend the pause");
-        uint256 currentPausedUntil = Storage.getUint(PAUSED_TIME_SLOT);
-
-        require(paused() == true, "SuperchainConfig: system is not paused");
-        require(duration <= Storage.getUint(MAX_PAUSE_SLOT), "SuperchainConfig: duration exceeds maxPause");
-
-        uint256 newPausedUntil = currentPausedUntil + duration;
-        Storage.setUint(PAUSED_TIME_SLOT, newPausedUntil);
-        emit PauseExtended(duration, identifier);
+            Storage.setUint(PAUSED_TIME_SLOT, newPausedUntil);
+            emit PauseExtended(duration, identifier);
+        }
     }
 
     /// @notice Unpauses withdrawals.
