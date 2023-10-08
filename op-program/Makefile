@@ -41,6 +41,8 @@ capture-goerli-verify: op-program-host op-program-client
 	env GO111MODULE=on go run ./verify/cmd/goerli.go --l1 $$L1URL --l2 $$L2URL --datadir temp/compat/goerli
 	tar jcf compat-tests/goerli.tar.bz -C temp/compat goerli
 
+capture-chain-test-data: capture-goerli-verify
+
 run-goerli-verify: op-program-host op-program-client
 	mkdir -p temp/compat
 	tar jxf compat-tests/goerli.tar.bz -C temp/compat
