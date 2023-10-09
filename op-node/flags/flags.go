@@ -39,6 +39,27 @@ var (
 		Usage:   "Rollup chain parameters",
 		EnvVars: prefixEnvVars("ROLLUP_CONFIG"),
 	}
+	/*DePIN DA, celestia add begin*/
+	DaRPC = &cli.StringFlag{
+		Name:   "da-rpc",
+		Usage:  "Data Availability RPC",
+		EnvVars: prefixEnvVars("DA_RPC"),
+		Value:  "http://da:26658",
+	}
+	NamespaceId = &cli.StringFlag{
+		Name:   "namespace-id",
+		Usage:  "Namespace ID for DA node",
+		EnvVars: prefixEnvVars("NAMESPACE_ID"),
+		Value:  "000008e5f679bf7116cb",
+	}
+	AuthToken = &cli.StringFlag{
+		Name: "auth-token",
+		Usage: "Authentication Token for DA node",
+		EnvVars: prefixEnvVars("AUTH_TOKEN"),
+		Value: "",
+	}
+	/*DePIN DA, celestia add end*/
+
 	Network = &cli.StringFlag{
 		Name:    "network",
 		Usage:   fmt.Sprintf("Predefined network selection. Available networks: %s", strings.Join(chaincfg.AvailableNetworks(), ", ")),
@@ -234,6 +255,11 @@ var (
 var requiredFlags = []cli.Flag{
 	L1NodeAddr,
 	L2EngineAddr,
+	/*DePIN DA, celestia add begin*/
+	DaRPC,
+	NamespaceId,
+	AuthToken,
+	/*DePIN DA, celestia add end*/
 }
 
 var optionalFlags = []cli.Flag{

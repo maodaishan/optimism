@@ -74,6 +74,7 @@ func newTxMgrConfig(l1Addr string, privKey *ecdsa.PrivateKey) txmgr.CLIConfig {
 		ReceiptQueryInterval:      50 * time.Millisecond,
 		NetworkTimeout:            2 * time.Second,
 		TxNotInMempoolTimeout:     2 * time.Minute,
+		NamespaceId:               "000008e5f679bf7116cb",	//DePIN DA,celestia add
 	}
 }
 
@@ -533,6 +534,15 @@ func (cfg SystemConfig) Start(_opts ...SystemConfigOption) (*System, error) {
 		}
 
 		c.Rollup.LogDescription(cfg.Loggers[name], chaincfg.L2ChainIDToNetworkName)
+
+		/*DePIN DA,celestia add begin*/
+		daCfg, err := rollup.NewDAConfig("http://127.0.0.1:26658", "0000e8e5f679bf7116cb", "")
+		if err != nil {
+			return nil, err
+		}
+
+		c.DAConfig = *daCfg
+		/*DePIN DA,celestia add end*/
 
 		node, err := rollupNode.New(context.Background(), &c, cfg.Loggers[name], snapLog, "", metrics.NewMetrics(""))
 		if err != nil {

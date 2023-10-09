@@ -38,6 +38,15 @@ var (
 		EnvVars: prefixEnvVars("L2OO_ADDRESS"),
 	}
 
+	/*DePIN DA, celestia add begin*/
+	DaRpcFlag = &cli.StringFlag{
+		Name:     "da-rpc",
+		Usage:    "HTTP provider URL for DA node",
+		Required: true,
+		EnvVars:   prefixEnvVars("DA_RPC"),
+	}
+	/*DePIN DA, celestia add end*/
+
 	// Optional flags
 	PollIntervalFlag = &cli.DurationFlag{
 		Name:    "poll-interval",
@@ -58,6 +67,7 @@ var requiredFlags = []cli.Flag{
 	L1EthRpcFlag,
 	RollupRpcFlag,
 	L2OOAddressFlag,
+	DaRpcFlag,	//DePIN DA,celestia add
 }
 
 var optionalFlags = []cli.Flag{

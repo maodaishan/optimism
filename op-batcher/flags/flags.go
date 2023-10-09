@@ -39,6 +39,14 @@ var (
 		Usage:   "HTTP provider URL for Rollup node",
 		EnvVars: prefixEnvVars("ROLLUP_RPC"),
 	}
+	/*DePIN DA, celestia add, begin */
+	DaRpcFlag = &cli.StringFlag{
+		Name:     "da-rpc",
+		Usage:    "HTTP provider URL for DA node",
+		Required: true,
+		EnvVars:   prefixEnvVars("DA_RPC"),
+	}
+	/*DePIN DA, celestia add, end */
 	// Optional flags
 	SubSafetyMarginFlag = &cli.Uint64Flag{
 		Name: "sub-safety-margin",
@@ -85,6 +93,7 @@ var requiredFlags = []cli.Flag{
 	L1EthRpcFlag,
 	L2EthRpcFlag,
 	RollupRpcFlag,
+	DaRpcFlag,	//DePIN DA, celestia add
 }
 
 var optionalFlags = []cli.Flag{

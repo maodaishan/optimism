@@ -2,6 +2,7 @@ package derive
 
 import (
 	"context"
+	"encoding/hex"	//DePIN DA,celestia add
 	"errors"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 
+	"github.com/ethereum-optimism/optimism/op-celestia/celestia"	//DePIN DA,celestia add
 	"github.com/ethereum-optimism/optimism/op-node/rollup"
 	"github.com/ethereum-optimism/optimism/op-service/eth"
 )
@@ -29,17 +31,19 @@ type L1TransactionFetcher interface {
 type DataSourceFactory struct {
 	log     log.Logger
 	cfg     *rollup.Config
+	daCfg   *rollup.DAConfig	//DePIN DA,celestia add
 	fetcher L1TransactionFetcher
 }
-
-func NewDataSourceFactory(log log.Logger, cfg *rollup.Config, fetcher L1TransactionFetcher) *DataSourceFactory {
-	return &DataSourceFactory{log: log, cfg: cfg, fetcher: fetcher}
+/*DePIN DA,celestia modify, add daCfg begin*/
+func NewDataSourceFactory(log log.Logger, cfg *rollup.Config, daCfg *rollup.DAConfig, fetcher L1TransactionFetcher) *DataSourceFactory {
+	return &DataSourceFactory{log: log, cfg: cfg, daCfg: daCfg, fetcher: fetcher}
 }
 
 // OpenData returns a DataIter. This struct implements the `Next` function.
-func (ds *DataSourceFactory) OpenData(ctx context.Context, id eth.BlockID, batcherAddr common.Address) DataIter {
-	return NewDataSource(ctx, ds.log, ds.cfg, ds.fetcher, id, batcherAddr)
+func (ds *DataSourceFactory) OpenData(ctx context.Context, id eth.BlockID, batcherAddr common.Address) (DataIter, error) {
+	return NewDataSource(ctx, ds.log, ds.cfg, ds.daCfg, ds.fetcher, id, batcherAddr)
 }
+/*DePIN DA,celestia modify, add daCfg end*/
 
 // DataSource is a fault tolerant approach to fetching data.
 // The constructor will never fail & it will instead re-attempt the fetcher
@@ -51,6 +55,7 @@ type DataSource struct {
 	// Required to re-attempt fetching
 	id      eth.BlockID
 	cfg     *rollup.Config // TODO: `DataFromEVMTransactions` should probably not take the full config
+	daCfg   *rollup.DAConfig	//DePIN DA,celestia add
 	fetcher L1TransactionFetcher
 	log     log.Logger
 
@@ -59,7 +64,8 @@ type DataSource struct {
 
 // NewDataSource creates a new calldata source. It suppresses errors in fetching the L1 block if they occur.
 // If there is an error, it will attempt to fetch the result on the next call to `Next`.
-func NewDataSource(ctx context.Context, log log.Logger, cfg *rollup.Config, fetcher L1TransactionFetcher, block eth.BlockID, batcherAddr common.Address) DataIter {
+/*DePIN DA,celestia modify, add daCfg, and err handle , begin*/
+func NewDataSource(ctx context.Context, log log.Logger, cfg *rollup.Config, daCfg *rollup.DAConfig, fetcher L1TransactionFetcher, block eth.BlockID, batcherAddr common.Address) (DataIter, error) {
 	_, txs, err := fetcher.InfoAndTxsByHash(ctx, block.Hash)
 	if err != nil {
 		return &DataSource{
@@ -69,14 +75,26 @@ func NewDataSource(ctx context.Context, log log.Logger, cfg *rollup.Config, fetc
 			fetcher:     fetcher,
 			log:         log,
 			batcherAddr: batcherAddr,
-		}
+		}, nil
 	} else {
+		data, err := DataFromEVMTransactions(cfg, daCfg, batcherAddr, txs, log.New("origin", block))
+		if err != nil {
+			return &DataSource{
+				open:        false,
+				id:          block,
+				cfg:         cfg,
+				fetcher:     fetcher,
+				log:         log,
+				batcherAddr: batcherAddr,
+			}, err
+		}
 		return &DataSource{
 			open: true,
-			data: DataFromEVMTransactions(cfg, batcherAddr, txs, log.New("origin", block)),
-		}
+			data: data,
+		}, nil
 	}
 }
+/*DePIN DA,celestia modify, add daCfg, and err handle , end*/
 
 // Next returns the next piece of data if it has it. If the constructor failed, this
 // will attempt to reinitialize itself. If it cannot find the block it returns a ResetError
@@ -85,7 +103,13 @@ func (ds *DataSource) Next(ctx context.Context) (eth.Data, error) {
 	if !ds.open {
 		if _, txs, err := ds.fetcher.InfoAndTxsByHash(ctx, ds.id.Hash); err == nil {
 			ds.open = true
-			ds.data = DataFromEVMTransactions(ds.cfg, ds.batcherAddr, txs, log.New("origin", ds.id))
+			/*DePIN DA,celestia modify, add daCfg, and err handle , begin*/
+			ds.data, err = DataFromEVMTransactions(ds.cfg, ds.daCfg, ds.batcherAddr, txs, log.New("origin", ds.id))
+			if err != nil {
+				// already wrapped
+				return nil, err
+			}
+			/*DePIN DA,celestia modify, add daCfg, and err handle , end*/
 		} else if errors.Is(err, ethereum.NotFound) {
 			return nil, NewResetError(fmt.Errorf("failed to open calldata source: %w", err))
 		} else {
@@ -104,7 +128,7 @@ func (ds *DataSource) Next(ctx context.Context) (eth.Data, error) {
 // DataFromEVMTransactions filters all of the transactions and returns the calldata from transactions
 // that are sent to the batch inbox address from the batch sender address.
 // This will return an empty array if no valid transactions are found.
-func DataFromEVMTransactions(config *rollup.Config, batcherAddr common.Address, txs types.Transactions, log log.Logger) []eth.Data {
+func DataFromEVMTransactions(config *rollup.Config, daCfg *rollup.DAConfig, batcherAddr common.Address, txs types.Transactions, log log.Logger) ([]eth.Data, error) { //DePIN DA, celestia add daCfg
 	var out []eth.Data
 	l1Signer := config.L1Signer()
 	for j, tx := range txs {
@@ -119,8 +143,25 @@ func DataFromEVMTransactions(config *rollup.Config, batcherAddr common.Address, 
 				log.Warn("tx in inbox with unauthorized submitter", "index", j, "err", err)
 				continue // not an authorized batch submitter, ignore
 			}
-			out = append(out, tx.Data())
+			/*DePIN DA,celestia modify, fetch data from celestia , begin*/
+			if daCfg != nil {
+				frameRef := celestia.FrameRef{}
+				frameRef.UnmarshalBinary(tx.Data())
+				if err != nil {
+					log.Warn("unable to decode frame reference", "index", j, "err", err)
+					return nil, err
+				}
+				log.Info("requesting data from celestia", "namespace", hex.EncodeToString(daCfg.Namespace), "height", frameRef.BlockHeight)
+				blob, err := daCfg.Client.Blob.Get(context.Background(), frameRef.BlockHeight, daCfg.Namespace, frameRef.TxCommitment)
+				if err != nil {
+					return nil, NewResetError(fmt.Errorf("failed to resolve frame from celestia: %w", err))
+				}
+				out = append(out, blob.Data)
+			} else {
+				out = append(out, tx.Data())
+			}
+			/*DePIN DA,celestia modify, fetch data from celestia , begin*/
 		}
 	}
-	return out
+	return out, nil	//DePIN DA, celestia modify, add nil
 }

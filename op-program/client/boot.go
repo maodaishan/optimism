@@ -28,6 +28,7 @@ const (
 const CustomChainIDIndicator = uint64(math.MaxUint64)
 
 type BootInfo struct {
+	DAConfig           *rollup.DAConfig    `json:"da_config"`	//DePIN DA, celestia add
 	L1Head             common.Hash
 	L2OutputRoot       common.Hash
 	L2Claim            common.Hash

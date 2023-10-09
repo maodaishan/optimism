@@ -35,8 +35,10 @@ type Driver struct {
 	targetBlockNum uint64
 }
 
-func NewDriver(logger log.Logger, cfg *rollup.Config, l1Source derive.L1Fetcher, l2Source L2Source, targetBlockNum uint64) *Driver {
-	pipeline := derive.NewDerivationPipeline(logger, cfg, l1Source, l2Source, metrics.NoopMetrics, &sync.Config{})
+/*DePIN DA, celestia modify, add daCfg,begin*/
+func NewDriver(logger log.Logger, cfg *rollup.Config, daCfg *rollup.DAConfig, l1Source derive.L1Fetcher, l2Source L2Source, targetBlockNum uint64) *Driver {
+	pipeline := derive.NewDerivationPipeline(logger, cfg, daCfg, l1Source, l2Source, metrics.NoopMetrics, &sync.Config{})
+/*DePIN DA, celestia modify, add daCfg,end*/
 	pipeline.Reset()
 	return &Driver{
 		logger:         logger,

@@ -120,9 +120,11 @@ func TestDataFromEVMTransactions(t *testing.T) {
 				expectedData = append(expectedData, txs[i].Data())
 			}
 		}
-
-		out := DataFromEVMTransactions(cfg, batcherAddr, txs, testlog.Logger(t, log.LvlCrit))
+		/*DePIN DA, celestia modify begin*/
+		out, err := DataFromEVMTransactions(cfg, nil, batcherAddr, txs, testlog.Logger(t, log.LvlCrit))
 		require.ElementsMatch(t, expectedData, out)
+		require.NoError(t, err)
+		/*DePIN DA, celestia modify end*/
 	}
 
 }
