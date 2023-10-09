@@ -197,7 +197,7 @@ require (
 	lukechampine.com/blake3 v1.1.7 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
-	/*DePIN DA,celestia add begin*/
+	//DePIN DA,celestia add begin
 	cosmossdk.io/math v1.0.1 // indirect
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
 	github.com/celestiaorg/go-fraud v0.1.2 // indirect
@@ -223,7 +223,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.56.1 // indirect
-	/*DePIN DA,celestia add end*/
+	//DePIN DA,celestia add end
 )
 
 replace github.com/ethereum/go-ethereum v1.12.0 => github.com/ethereum-optimism/op-geth v1.101106.1-0.20230724181546-b9c6d36ae9b8
