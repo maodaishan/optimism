@@ -2,7 +2,7 @@ package txmgr
 
 import (
 	"context"
-	"encoding/hex"	//DePIN DA,celestia add
+	"encoding/hex" //DePIN DA,celestia add
 	"errors"
 	"fmt"
 	"math/big"
@@ -18,11 +18,11 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	/*DePIN DA, celestia add begin*/
+	"github.com/ethereum-optimism/optimism/op-celestia/celestia"
 	openrpc "github.com/rollkit/celestia-openrpc"
 	"github.com/rollkit/celestia-openrpc/types/blob"
 	openrpcns "github.com/rollkit/celestia-openrpc/types/namespace"
 	"github.com/rollkit/celestia-openrpc/types/share"
-	"github.com/ethereum-optimism/optimism/op-celestia/celestia"
 	/*DePIN DA, celestia add end*/
 
 	"github.com/ethereum-optimism/optimism/op-service/backoff"
@@ -231,7 +231,7 @@ func (m *SimpleTxManager) send(ctx context.Context, candidate TxCandidate) (*typ
 			m.l.Warn("unable to wait for celestia header sync", "err", err)
 			return nil, err
 		}
-		height, err := m.daClient.Blob.Submit(ctx, []*blob.Blob{dataBlob})
+		height, err := m.daClient.Blob.Submit(ctx, []*blob.Blob{dataBlob}, openrpc.SubmitOptions.DefaultSubmitOptions())
 		if err != nil {
 			m.l.Warn("unable to publish tx to celestia", "err", err)
 			return nil, err
@@ -242,7 +242,7 @@ func (m *SimpleTxManager) send(ctx context.Context, candidate TxCandidate) (*typ
 			return nil, errors.New("unexpected response code")
 		}
 		frameRef := celestia.FrameRef{
-			BlockHeight: height,
+			BlockHeight:  height,
 			TxCommitment: com,
 		}
 		frameRefData, _ := frameRef.MarshalBinary()
@@ -304,7 +304,7 @@ func (m *SimpleTxManager) craftTx(ctx context.Context, candidate TxCandidate) (*
 			GasTipCap: gasTipCap,
 			Data:      rawTx.Data,
 		})
-		m.l.Warn("estimating gas", "candidate", candidate, "gasFeeCap", gasFeeCap, "gasTipCap", gasTipCap, "err", err)	//DePIN DA,celestia add
+		m.l.Warn("estimating gas", "candidate", candidate, "gasFeeCap", gasFeeCap, "gasTipCap", gasTipCap, "err", err) //DePIN DA,celestia add
 		if err != nil {
 			return nil, fmt.Errorf("failed to estimate gas: %w", err)
 		}
