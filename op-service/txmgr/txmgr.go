@@ -231,7 +231,7 @@ func (m *SimpleTxManager) send(ctx context.Context, candidate TxCandidate) (*typ
 			m.l.Warn("unable to wait for celestia header sync", "err", err)
 			return nil, err
 		}
-		height, err := m.daClient.Blob.Submit(ctx, []*blob.Blob{dataBlob}, openrpc.SubmitOptions.DefaultSubmitOptions())
+		height, err := m.daClient.Blob.Submit(ctx, []*blob.Blob{dataBlob}, nil)
 		if err != nil {
 			m.l.Warn("unable to publish tx to celestia", "err", err)
 			return nil, err
