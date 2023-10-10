@@ -62,9 +62,9 @@ func NewConfig(ctx *cli.Context, log log.Logger) (*node.Config, error) {
 	syncConfig := NewSyncConfig(ctx)
 	/*DePIN DA,celestia add begin*/
 	daCfg, err := rollup.NewDAConfig(
-		ctx.GlobalString(flags.DaRPC.Name),
-		ctx.GlobalString(flags.AuthToken.Name),
-		ctx.GlobalString(flags.NamespaceId.Name),
+		ctx.String(flags.DaRPC.Name),
+		ctx.String(flags.AuthToken.Name),
+		ctx.String(flags.NamespaceId.Name),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load da config: %w", err)
@@ -72,12 +72,12 @@ func NewConfig(ctx *cli.Context, log log.Logger) (*node.Config, error) {
 	/*DePIN DA,celestia add end*/
 
 	cfg := &node.Config{
-		L1:     l1Endpoint,
-		L2:     l2Endpoint,
-		L2Sync: l2SyncEndpoint,
-		Rollup: *rollupConfig,
-		DAConfig: *daCfg,	//DePIN DA,celestia add
-		Driver: *driverConfig,
+		L1:       l1Endpoint,
+		L2:       l2Endpoint,
+		L2Sync:   l2SyncEndpoint,
+		Rollup:   *rollupConfig,
+		DAConfig: *daCfg, //DePIN DA,celestia add
+		Driver:   *driverConfig,
 		RPC: node.RPCConfig{
 			ListenAddr:  ctx.String(flags.RPCListenAddr.Name),
 			ListenPort:  ctx.Int(flags.RPCListenPort.Name),
