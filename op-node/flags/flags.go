@@ -41,22 +41,22 @@ var (
 	}
 	/*DePIN DA, celestia add begin*/
 	DaRPC = &cli.StringFlag{
-		Name:   "da-rpc",
-		Usage:  "Data Availability RPC",
+		Name:    "da-rpc",
+		Usage:   "Data Availability RPC",
 		EnvVars: prefixEnvVars("DA_RPC"),
-		Value:  "http://da:26658",
+		Value:   "http://localhost:26658",
 	}
 	NamespaceId = &cli.StringFlag{
-		Name:   "namespace-id",
-		Usage:  "Namespace ID for DA node",
+		Name:    "namespace-id",
+		Usage:   "Namespace ID for DA node",
 		EnvVars: prefixEnvVars("NAMESPACE_ID"),
-		Value:  "000008e5f679bf7116cb",
+		Value:   "25519255192551925519",
 	}
 	AuthToken = &cli.StringFlag{
-		Name: "auth-token",
-		Usage: "Authentication Token for DA node",
+		Name:    "auth-token",
+		Usage:   "Authentication Token for DA node",
 		EnvVars: prefixEnvVars("AUTH_TOKEN"),
-		Value: "",
+		Value:   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.UZkqfxuCQiSnEYp8R5ixiE6GurbE-TB6IqzwioZzGDo",
 	}
 	/*DePIN DA, celestia add end*/
 

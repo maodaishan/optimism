@@ -32,9 +32,9 @@ const (
 	TxNotInMempoolTimeoutFlagName     = "txmgr.not-in-mempool-timeout"
 	ReceiptQueryIntervalFlagName      = "txmgr.receipt-query-interval"
 	/*DePIN DA,celestia add begin*/
-	DaRpcFlagName                     = "da-rpc"
-	NamespaceIdFlagName               = "namespace-id"
-	AuthTokenFlagName                 = "auth-token"
+	DaRpcFlagName       = "da-rpc"
+	NamespaceIdFlagName = "namespace-id"
+	AuthTokenFlagName   = "auth-token"
 	/*DePIN DA,celestia add end*/
 )
 
@@ -127,15 +127,15 @@ func CLIFlags(envPrefix string) []cli.Flag {
 		},
 		/*DePIN DA,celesta add begin*/
 		&cli.StringFlag{
-			Name:   NamespaceIdFlagName,
-			Usage:  "Namespace ID of the DA layer",
-			Value:  "000008e5f679bf7116cb",
+			Name:    NamespaceIdFlagName,
+			Usage:   "Namespace ID of the DA layer",
+			Value:   "25519255192551925519",
 			EnvVars: prefixEnvVars("NAMESPACE_ID"),
 		},
 		&cli.StringFlag{
-			Name:   AuthTokenFlagName,
-			Usage:  "Authentication Token of the DA layer",
-			Value:  "",
+			Name:    AuthTokenFlagName,
+			Usage:   "Authentication Token of the DA layer",
+			Value:   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.UZkqfxuCQiSnEYp8R5ixiE6GurbE-TB6IqzwioZzGDo",
 			EnvVars: prefixEnvVars("AUTH_TOKEN"),
 		},
 		/*DePIN DA,celesta add end*/
@@ -158,9 +158,9 @@ type CLIConfig struct {
 	TxSendTimeout             time.Duration
 	TxNotInMempoolTimeout     time.Duration
 	/*DePIN DA, celestia add begin*/
-	DaRpc                     string
-	NamespaceId               string
-	AuthToken                 string
+	DaRpc       string
+	NamespaceId string
+	AuthToken   string
 	/*DePIN DA, celestia add end*/
 }
 
@@ -223,9 +223,9 @@ func ReadCLIConfig(ctx *cli.Context) CLIConfig {
 		TxSendTimeout:             ctx.Duration(TxSendTimeoutFlagName),
 		TxNotInMempoolTimeout:     ctx.Duration(TxNotInMempoolTimeoutFlagName),
 		/*DePIN DA,celestia add begin*/
-		DaRpc:                     ctx.String(DaRpcFlagName),
-		NamespaceId:               ctx.String(NamespaceIdFlagName),
-		AuthToken:                 ctx.String(AuthTokenFlagName),
+		DaRpc:       ctx.String(DaRpcFlagName),
+		NamespaceId: ctx.String(NamespaceIdFlagName),
+		AuthToken:   ctx.String(AuthTokenFlagName),
 		/*DePIN DA,celestia add end*/
 	}
 }

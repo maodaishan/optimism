@@ -2,7 +2,7 @@ package derive
 
 import (
 	"context"
-	"encoding/hex"	//DePIN DA,celestia add
+	"encoding/hex" //DePIN DA,celestia add
 	"errors"
 	"fmt"
 	"io"
@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 
-	"github.com/ethereum-optimism/optimism/op-celestia/celestia"	//DePIN DA,celestia add
+	"github.com/ethereum-optimism/optimism/op-celestia/celestia" //DePIN DA,celestia add
 	"github.com/ethereum-optimism/optimism/op-node/rollup"
 	"github.com/ethereum-optimism/optimism/op-service/eth"
 )
@@ -31,9 +31,10 @@ type L1TransactionFetcher interface {
 type DataSourceFactory struct {
 	log     log.Logger
 	cfg     *rollup.Config
-	daCfg   *rollup.DAConfig	//DePIN DA,celestia add
+	daCfg   *rollup.DAConfig //DePIN DA,celestia add
 	fetcher L1TransactionFetcher
 }
+
 /*DePIN DA,celestia modify, add daCfg begin*/
 func NewDataSourceFactory(log log.Logger, cfg *rollup.Config, daCfg *rollup.DAConfig, fetcher L1TransactionFetcher) *DataSourceFactory {
 	return &DataSourceFactory{log: log, cfg: cfg, daCfg: daCfg, fetcher: fetcher}
@@ -43,6 +44,7 @@ func NewDataSourceFactory(log log.Logger, cfg *rollup.Config, daCfg *rollup.DACo
 func (ds *DataSourceFactory) OpenData(ctx context.Context, id eth.BlockID, batcherAddr common.Address) (DataIter, error) {
 	return NewDataSource(ctx, ds.log, ds.cfg, ds.daCfg, ds.fetcher, id, batcherAddr)
 }
+
 /*DePIN DA,celestia modify, add daCfg end*/
 
 // DataSource is a fault tolerant approach to fetching data.
@@ -54,8 +56,8 @@ type DataSource struct {
 	data []eth.Data
 	// Required to re-attempt fetching
 	id      eth.BlockID
-	cfg     *rollup.Config // TODO: `DataFromEVMTransactions` should probably not take the full config
-	daCfg   *rollup.DAConfig	//DePIN DA,celestia add
+	cfg     *rollup.Config   // TODO: `DataFromEVMTransactions` should probably not take the full config
+	daCfg   *rollup.DAConfig //DePIN DA,celestia add
 	fetcher L1TransactionFetcher
 	log     log.Logger
 
@@ -94,6 +96,7 @@ func NewDataSource(ctx context.Context, log log.Logger, cfg *rollup.Config, daCf
 		}, nil
 	}
 }
+
 /*DePIN DA,celestia modify, add daCfg, and err handle , end*/
 
 // Next returns the next piece of data if it has it. If the constructor failed, this
@@ -160,8 +163,8 @@ func DataFromEVMTransactions(config *rollup.Config, daCfg *rollup.DAConfig, batc
 			} else {
 				out = append(out, tx.Data())
 			}
-			/*DePIN DA,celestia modify, fetch data from celestia , begin*/
+			/*DePIN DA,celestia modify, fetch data from celestia , end*/
 		}
 	}
-	return out, nil	//DePIN DA, celestia modify, add nil
+	return out, nil //DePIN DA, celestia modify, add nil
 }

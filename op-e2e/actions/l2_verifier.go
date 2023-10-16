@@ -60,7 +60,7 @@ type L2API interface {
 func NewL2Verifier(t Testing, log log.Logger, l1 derive.L1Fetcher, eng L2API, cfg *rollup.Config, syncCfg *sync.Config) *L2Verifier {
 	metrics := &testutils.TestDerivationMetrics{}
 	/*DePIN DA,celestia modify begin*/
-	daCfg, err := rollup.NewDAConfig("http://localhost:26658", "0000e8e5f679bf7116cb", "")
+	daCfg, err := rollup.NewDAConfig("http://localhost:26658", "25519255192551925519", "")
 	require.NoError(t, err)
 	pipeline := derive.NewDerivationPipeline(log, cfg, daCfg, l1, eng, metrics, syncCfg)
 	/*DePIN DA,celestia modify end*/

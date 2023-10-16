@@ -44,7 +44,8 @@ var (
 		Name:     "da-rpc",
 		Usage:    "HTTP provider URL for DA node",
 		Required: true,
-		EnvVars:   prefixEnvVars("DA_RPC"),
+		EnvVars:  prefixEnvVars("DA_RPC"),
+		Value:    "http://localhost:26658",
 	}
 	/*DePIN DA, celestia add, end */
 	// Optional flags
@@ -93,7 +94,7 @@ var requiredFlags = []cli.Flag{
 	L1EthRpcFlag,
 	L2EthRpcFlag,
 	RollupRpcFlag,
-	DaRpcFlag,	//DePIN DA, celestia add
+	DaRpcFlag, //DePIN DA, celestia add
 }
 
 var optionalFlags = []cli.Flag{

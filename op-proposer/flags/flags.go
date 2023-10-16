@@ -44,6 +44,7 @@ var (
 		Usage:    "HTTP provider URL for DA node",
 		Required: true,
 		EnvVars:   prefixEnvVars("DA_RPC"),
+		Value:	  "http://localhost:26658"
 	}
 	/*DePIN DA, celestia add end*/
 
