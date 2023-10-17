@@ -11,7 +11,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/txpool"
@@ -219,7 +218,7 @@ func (m *SimpleTxManager) send(ctx context.Context, candidate TxCandidate) (*typ
 	// writes to a smart contract, we overwrite _only_ batcher candidate as the
 	// frame pointer to celestia, while retaining the proposer pathway that
 	// writes the state commitment data to ethereum.
-	if candidate.To.Hex() == "0xff0000000000000000000000000000000000042" {
+	if candidate.To.Hex() == "0xFf00000000000000000000000000000000042069" {
 		dataBlob, err := blob.NewBlobV0(m.namespace.Bytes(), candidate.TxData)
 		com, err := blob.CreateCommitment(dataBlob)
 		if err != nil {
