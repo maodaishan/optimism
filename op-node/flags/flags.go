@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum-optimism/optimism/op-node/sources"
 	openum "github.com/ethereum-optimism/optimism/op-service/enum"
 	oplog "github.com/ethereum-optimism/optimism/op-service/log"
+	"github.com/urfave/cli/v2"
 )
 
 // Flags
