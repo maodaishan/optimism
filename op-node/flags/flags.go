@@ -9,8 +9,6 @@ import (
 	"github.com/ethereum-optimism/optimism/op-node/sources"
 	openum "github.com/ethereum-optimism/optimism/op-service/enum"
 	oplog "github.com/ethereum-optimism/optimism/op-service/log"
-
-	"github.com/urfave/cli/v2"
 )
 
 // Flags
@@ -56,7 +54,7 @@ var (
 		Name:    "auth-token",
 		Usage:   "Authentication Token for DA node",
 		EnvVars: prefixEnvVars("AUTH_TOKEN"),
-		Value:   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.UZkqfxuCQiSnEYp8R5ixiE6GurbE-TB6IqzwioZzGDo",
+		Value:   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.PujDN41E8shMQ-0zyvus9XM7XJvEmzDgRMPHUD5ybIMu",
 	}
 	/*DePIN DA, celestia add end*/
 
