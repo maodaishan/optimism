@@ -135,7 +135,7 @@ func CLIFlags(envPrefix string) []cli.Flag {
 		&cli.StringFlag{
 			Name:    AuthTokenFlagName,
 			Usage:   "Authentication Token of the DA layer",
-			Value:   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.UZkqfxuCQiSnEYp8R5ixiE6GurbE-TB6IqzwioZzGDo",
+			Value:   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.imsHWPvVp1xnJpNLCDVPi3HcU9PIS2m9bzlj4NDcl48",
 			EnvVars: prefixEnvVars("AUTH_TOKEN"),
 		},
 		/*DePIN DA,celesta add end*/
