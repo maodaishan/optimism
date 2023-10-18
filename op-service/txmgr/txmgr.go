@@ -219,19 +219,24 @@ func (m *SimpleTxManager) send(ctx context.Context, candidate TxCandidate) (*typ
 	// writes to a smart contract, we overwrite _only_ batcher candidate as the
 	// frame pointer to celestia, while retaining the proposer pathway that
 	// writes the state commitment data to ethereum.
+	m.l.Warn("maods celestia 1")
 	if candidate.To.Hex() == "0xFf00000000000000000000000000000000042069" {
+		m.l.Warn("maods celestia 2", "namespace:", m.namespace.Bytes())
 		dataBlob, err := blob.NewBlobV0(m.namespace.Bytes(), candidate.TxData)
 		com, err := blob.CreateCommitment(dataBlob)
+		m.l.Warn("maods celestia 3")
 		if err != nil {
 			m.l.Warn("unable to create blob commitment to celestia", "err", err)
 			return nil, err
 		}
 		err = m.daClient.Header.SyncWait(ctx)
+		m.l.Warn("maods celestia 4")
 		if err != nil {
 			m.l.Warn("unable to wait for celestia header sync", "err", err)
 			return nil, err
 		}
 		height, err := m.daClient.Blob.Submit(ctx, []*blob.Blob{dataBlob}, nil)
+		m.l.Warn("maods celestia 5")
 		if err != nil {
 			m.l.Warn("unable to publish tx to celestia", "err", err)
 			return nil, err
