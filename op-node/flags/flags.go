@@ -55,7 +55,7 @@ var (
 		Name:    "auth-token",
 		Usage:   "Authentication Token for DA node",
 		EnvVars: prefixEnvVars("AUTH_TOKEN"),
-		Value:   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.PujDN41E8shMQ-0zyvus9XM7XJvEmzDgRMPHUD5ybIM",
+		Value:   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.imsHWPvVp1xnJpNLCDVPi3HcU9PIS2m9bzlj4NDcl48",
 	}
 	/*DePIN DA, celestia add end*/
 
