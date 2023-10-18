@@ -229,12 +229,12 @@ func (m *SimpleTxManager) send(ctx context.Context, candidate TxCandidate) (*typ
 			m.l.Warn("unable to create blob commitment to celestia", "err", err)
 			return nil, err
 		}
-		err = m.daClient.Header.SyncWait(ctx)
+		/*err = m.daClient.Header.SyncWait(ctx)
 		m.l.Warn("maods celestia 4")
 		if err != nil {
 			m.l.Warn("unable to wait for celestia header sync", "err", err)
 			return nil, err
-		}
+		}*/
 		height, err := m.daClient.Blob.Submit(ctx, []*blob.Blob{dataBlob}, nil)
 		m.l.Warn("maods celestia 5")
 		if err != nil {
