@@ -127,6 +127,7 @@ func NewSimpleTxManager(name string, l log.Logger, m metrics.TxMetricer, cfg CLI
 	}
 
 	/*DePIN DA,celestia add begin*/
+	m.l.Warn("maods cfg.AuthToken:", cfg.AuthToken)
 	daClient, err := openrpc.NewClient(context.Background(), cfg.DaRpc, cfg.AuthToken)
 	if err != nil {
 		return nil, err
