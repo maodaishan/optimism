@@ -393,6 +393,7 @@ func (l *BatchSubmitter) sendTransaction(txdata txData, queue *txmgr.Queue[txDat
 		TxData:   data,
 		GasLimit: intrinsicGas,
 	}
+	l.log.Warn("maods batch trying to send tx")
 	queue.Send(txdata, candidate, receiptsCh)
 }
 
