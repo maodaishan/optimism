@@ -1,0 +1,59 @@
+{
+  "numDeployConfirmations": 1,
+
+  "finalSystemOwner": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
+  "portalGuardian": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
+
+  "l1StartingBlockTag": "0x5e1b323c1fcc1376ae73860b338cd54040a0fd095f217c23a4535d0d7459e2fb",
+
+  "l1ChainID": 420,
+  "l2ChainID": 25519,
+  "l2BlockTime": 2,
+  "l1BlockTime": 2,
+
+  "maxSequencerDrift": 600,
+  "sequencerWindowSize": 7200,
+  "channelTimeout": 300,
+
+  "p2pSequencerAddress": "0xB1D28b52843A2019deB7Cea13C15a1F9103eC7D6",
+  "batchInboxAddress": "0xff00000000000000000000000000000000025519",
+  "batchSenderAddress": "0x8df4A2c3ae3E8F3482805D4dd23219e98FDE092e",
+
+  "l2OutputOracleSubmissionInterval": 120,
+  "l2OutputOracleStartingBlockNumber": 0,
+  "l2OutputOracleStartingTimestamp": 1698135220,
+
+  "l2OutputOracleProposer": "0xb7F94462708B9e52B50FaF560c1AdD6cF228e49a",
+  "l2OutputOracleChallenger": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
+
+  "finalizationPeriodSeconds": 12,
+
+  "proxyAdminOwner": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
+  "baseFeeVaultRecipient": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
+  "l1FeeVaultRecipient": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
+  "sequencerFeeVaultRecipient": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
+
+  "baseFeeVaultMinimumWithdrawalAmount": "0x8ac7230489e8000",
+  "l1FeeVaultMinimumWithdrawalAmount": "0x8ac7230489e8000",
+  "sequencerFeeVaultMinimumWithdrawalAmount": "0x8ac7230489e8000",
+  "baseFeeVaultWithdrawalNetwork": 0,
+  "l1FeeVaultWithdrawalNetwork": 0,
+  "sequencerFeeVaultWithdrawalNetwork": 0,
+
+  "gasPriceOracleOverhead": 1,
+  "gasPriceOracleScalar": 1,
+
+  "enableGovernance": true,
+  "governanceTokenSymbol": "BOAT",
+  "governanceTokenName": "BOAT",
+  "governanceTokenOwner": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
+
+  "l2GenesisBlockGasLimit": "0x5F5 E100",
+  "l2GenesisBlockBaseFeePerGas": "0x1",
+  "l2GenesisRegolithTimeOffset": "0x0",
+
+  "eip1559Denominator": 50,
+  "eip1559Elasticity": 10,
+
+  "systemConfigStartBlock": 0
+}
