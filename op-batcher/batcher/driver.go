@@ -74,7 +74,7 @@ func NewBatchSubmitterFromCLIConfig(cfg CLIConfig, l log.Logger, m metrics.Metri
 	if err != nil {
 		return nil, err
 	}
-
+	l.Info("maods NewBatchSubmitterFromCLIConfig,PollInterval:", cfg.PollInterval)
 	batcherCfg := Config{
 		L1Client:               l1Client,
 		L2Client:               l2Client,
@@ -196,7 +196,7 @@ func (l *BatchSubmitter) loadBlocksIntoState(ctx context.Context) error {
 	} else if start.Number >= end.Number {
 		return errors.New("start number is >= end number")
 	}
-
+	l.log.Info("maods loadBlocksIntoState, start:", start, ",end:", end)
 	var latestBlock *types.Block
 	// Add all blocks to "state"
 	for i := start.Number + 1; i < end.Number+1; i++ {
@@ -220,6 +220,7 @@ func (l *BatchSubmitter) loadBlocksIntoState(ctx context.Context) error {
 	}
 
 	l.metr.RecordL2BlocksLoaded(l2ref)
+	l.log.Info("maods loadBlocksIntoState,l2Ref.L1Origin:", l2ref.L1Origin, "l2Ref.sequenceNumber:", l2ref.SequenceNumber)
 	return nil
 }
 
@@ -285,7 +286,7 @@ func (l *BatchSubmitter) calculateL2BlockRangeToStore(ctx context.Context) (eth.
 
 func (l *BatchSubmitter) loop() {
 	defer l.wg.Done()
-
+	l.log.Info("maods loop 1 ,PoolInterval:", l.PollInterval)
 	ticker := time.NewTicker(l.PollInterval)
 	defer ticker.Stop()
 
@@ -295,6 +296,7 @@ func (l *BatchSubmitter) loop() {
 	for {
 		select {
 		case <-ticker.C:
+			l.log.Info("maods tick")
 			if err := l.loadBlocksIntoState(l.shutdownCtx); errors.Is(err, ErrReorg) {
 				err := l.state.Close()
 				if err != nil {
