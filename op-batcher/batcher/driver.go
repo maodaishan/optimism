@@ -74,7 +74,7 @@ func NewBatchSubmitterFromCLIConfig(cfg CLIConfig, l log.Logger, m metrics.Metri
 	if err != nil {
 		return nil, err
 	}
-	l.Info("maods NewBatchSubmitterFromCLIConfig,PollInterval:", cfg.PollInterval)
+	l.Info("maods NewBatchSubmitterFromCLIConfig,PollInterval:", cfg.PollInterval.String())
 	batcherCfg := Config{
 		L1Client:               l1Client,
 		L2Client:               l2Client,

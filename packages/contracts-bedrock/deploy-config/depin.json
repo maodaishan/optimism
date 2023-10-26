@@ -4,7 +4,7 @@
   "finalSystemOwner": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
   "portalGuardian": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
 
-  "l1StartingBlockTag": "0x5e1b323c1fcc1376ae73860b338cd54040a0fd095f217c23a4535d0d7459e2fb",
+  "l1StartingBlockTag": "0x6aea4175fccd85f4a22b33ca6a3e2266ff43714450e7192aad4250850b364438",
 
   "l1ChainID": 420,
   "l2ChainID": 25519,
@@ -12,7 +12,7 @@
   "l1BlockTime": 2,
 
   "maxSequencerDrift": 600,
-  "sequencerWindowSize": 7200,
+  "sequencerWindowSize": 3600,
   "channelTimeout": 300,
 
   "p2pSequencerAddress": "0xB1D28b52843A2019deB7Cea13C15a1F9103eC7D6",
@@ -21,7 +21,7 @@
 
   "l2OutputOracleSubmissionInterval": 120,
   "l2OutputOracleStartingBlockNumber": 0,
-  "l2OutputOracleStartingTimestamp": 1698135220,
+  "l2OutputOracleStartingTimestamp": 1698212402,
 
   "l2OutputOracleProposer": "0xb7F94462708B9e52B50FaF560c1AdD6cF228e49a",
   "l2OutputOracleChallenger": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
@@ -48,10 +48,9 @@
   "governanceTokenName": "BOAT",
   "governanceTokenOwner": "0x44823dbD203f2Bf82ef551888B615D2d0AD72CD5",
 
-  "l2GenesisBlockGasLimit": "0x5F5 E100",
+  "l2GenesisBlockGasLimit": "0x5f5e100",
   "l2GenesisBlockBaseFeePerGas": "0x1",
   "l2GenesisRegolithTimeOffset": "0x0",
-
   "eip1559Denominator": 50,
   "eip1559Elasticity": 10,
 
