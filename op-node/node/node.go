@@ -146,7 +146,8 @@ func (n *OpNode) initL1(ctx context.Context, cfg *Config) error {
 	}
 
 	// Keep subscribed to the L1 heads, which keeps the L1 maintainer pointing to the best headers to sync
-	n.l1HeadsSub = event.ResubscribeErr(time.Second*10, func(ctx context.Context, err error) (event.Subscription, error) {
+	//DePIN , maods modify : subscribe time 10->2, because we're L3,and L2 blocktime is 2.
+	n.l1HeadsSub = event.ResubscribeErr(time.Second*2, func(ctx context.Context, err error) (event.Subscription, error) {
 		if err != nil {
 			n.log.Warn("resubscribing after failed L1 subscription", "err", err)
 		}
