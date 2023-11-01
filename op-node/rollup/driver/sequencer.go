@@ -137,18 +137,18 @@ func (d *Sequencer) PlanNextSequencerAction() time.Duration {
 	now := d.timeNow()
 
 	buildingOnto, buildingID, _ := d.engine.BuildingPayload()
-	d.log.Warn("maods PlanNextSequencerAction 3,head:",head.String(),",buildingID:",buildingID.String(),",buildingOnto:",buildingOnto.String())
+	d.log.Warn("maods PlanNextSequencerAction 3,head:", head.String(), ",buildingID:", buildingID.String(), ",buildingOnto:", buildingOnto.String())
 	// We may have to wait till the next sequencing action, e.g. upon an error.
 	// If the head changed we need to respond and will not delay the sequencing.
 	if delay := d.nextAction.Sub(now); delay > 0 && buildingOnto.Hash == head.Hash {
-		d.log.Warn("maods PlanNextSequencerAction 4,delay:",delay.String(),",nextAction:",d.nextAction.String())
+		d.log.Warn("maods PlanNextSequencerAction 4,delay:", delay.String(), ",nextAction:", d.nextAction.String())
 		return delay
 	}
 
 	blockTime := time.Duration(d.config.BlockTime) * time.Second
 	payloadTime := time.Unix(int64(head.Time+d.config.BlockTime), 0)
 	remainingTime := payloadTime.Sub(now)
-	d.log.Warn("maods PlanNextSequencerAction 5,blockTime:",blockTime.String(),",payloadTime:",payloadTime.String(),",remainingTime:",remainingTime.String())
+	d.log.Warn("maods PlanNextSequencerAction 5,blockTime:", blockTime.String(), ",payloadTime:", payloadTime.String(), ",remainingTime:", remainingTime.String())
 	// If we started building a block already, and if that work is still consistent,
 	// then we would like to finish it by sealing the block.
 	if buildingID != (eth.PayloadID{}) && buildingOnto.Hash == head.Hash {
@@ -156,10 +156,11 @@ func (d *Sequencer) PlanNextSequencerAction() time.Duration {
 		d.log.Warn("maods PlanNextSequencerAction 6,begin sealing")
 		if remainingTime < sealingDuration {
 			d.log.Warn("maods PlanNextSequencerAction 7,return 0")
-			return 0 // if there's not enough time for sealing, don't wait.
+			//DePIN maods modify: 0->noWaitDuration
+			return noWaitDuration // if there's not enough time for sealing, don't wait.
 		} else {
 			// finish with margin of sealing duration before payloadTime
-			d.log.Warn("maods PlanNextSequencerAction 8,remainingTime - sealingDuration:",remainingTime - sealingDuration)
+			d.log.Warn("maods PlanNextSequencerAction 8,remainingTime - sealingDuration:", remainingTime-sealingDuration)
 			return remainingTime - sealingDuration
 		}
 	} else {
@@ -167,12 +168,13 @@ func (d *Sequencer) PlanNextSequencerAction() time.Duration {
 		d.log.Warn("maods PlanNextSequencerAction 9")
 		if remainingTime > blockTime {
 			// if we have too much time, then wait before starting the build
-			d.log.Warn("maods PlanNextSequencerAction 10,remainingTime - blockTime:",remainingTime - blockTime)
+			d.log.Warn("maods PlanNextSequencerAction 10,remainingTime - blockTime:", remainingTime-blockTime)
 			return remainingTime - blockTime
 		} else {
 			// otherwise start instantly
 			d.log.Warn("maods PlanNextSequencerAction 11")
-			return 0
+			//DePIN maods modify: 0->noWaitDuration
+			return noWaitDuration
 		}
 	}
 }
