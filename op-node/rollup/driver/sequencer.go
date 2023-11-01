@@ -125,7 +125,9 @@ func (d *Sequencer) CancelBuildingBlock(ctx context.Context) {
 func (d *Sequencer) PlanNextSequencerAction() time.Duration {
 	// If the engine is busy building safe blocks (and thus changing the head that we would sync on top of),
 	// then give it time to sync up.
+	d.log.Warn("maods PlanNextSequencerAction 1")
 	if onto, _, safe := d.engine.BuildingPayload(); safe {
+		d.log.Warn("maods PlanNextSequencerAction 2,build L2 block")
 		d.log.Warn("delaying sequencing to not interrupt safe-head changes", "onto", onto, "onto_time", onto.Time)
 		// approximates the worst-case time it takes to build a block, to reattempt sequencing after.
 		return time.Second * time.Duration(d.config.BlockTime)
@@ -135,34 +137,41 @@ func (d *Sequencer) PlanNextSequencerAction() time.Duration {
 	now := d.timeNow()
 
 	buildingOnto, buildingID, _ := d.engine.BuildingPayload()
-
+	d.log.Warn("maods PlanNextSequencerAction 3,head:",head.String(),",now:",now.String())
 	// We may have to wait till the next sequencing action, e.g. upon an error.
 	// If the head changed we need to respond and will not delay the sequencing.
 	if delay := d.nextAction.Sub(now); delay > 0 && buildingOnto.Hash == head.Hash {
+		d.log.Warn("maods PlanNextSequencerAction 4,delay:",delay.String(),",nextAction:",d.nextAction.String())
 		return delay
 	}
 
 	blockTime := time.Duration(d.config.BlockTime) * time.Second
 	payloadTime := time.Unix(int64(head.Time+d.config.BlockTime), 0)
 	remainingTime := payloadTime.Sub(now)
-
+	d.log.Warn("maods PlanNextSequencerAction 4,blockTime:",blockTime.String(),",payloadTime:",payloadTime.String(),",remainingTime:",remainingTime.String())
 	// If we started building a block already, and if that work is still consistent,
 	// then we would like to finish it by sealing the block.
 	if buildingID != (eth.PayloadID{}) && buildingOnto.Hash == head.Hash {
 		// if we started building already, then we will schedule the sealing.
+		d.log.Warn("maods PlanNextSequencerAction 5,begin sealing")
 		if remainingTime < sealingDuration {
+			d.log.Warn("maods PlanNextSequencerAction 6,return 0")
 			return 0 // if there's not enough time for sealing, don't wait.
 		} else {
 			// finish with margin of sealing duration before payloadTime
+			d.log.Warn("maods PlanNextSequencerAction 7,remainingTime - sealingDuration:",remainingTime - sealingDuration)
 			return remainingTime - sealingDuration
 		}
 	} else {
 		// if we did not yet start building, then we will schedule the start.
+		d.log.Warn("maods PlanNextSequencerAction 8")
 		if remainingTime > blockTime {
 			// if we have too much time, then wait before starting the build
+			d.log.Warn("maods PlanNextSequencerAction 9,remainingTime - blockTime:",remainingTime - blockTime)
 			return remainingTime - blockTime
 		} else {
 			// otherwise start instantly
+			d.log.Warn("maods PlanNextSequencerAction 10")
 			return 0
 		}
 	}
@@ -197,13 +206,16 @@ func (d *Sequencer) BuildingOnto() eth.L2BlockRef {
 // but the derivation can continue to reset until the chain is correct.
 // If the engine is currently building safe blocks, then that building is not interrupted, and sequencing is delayed.
 func (d *Sequencer) RunNextSequencerAction(ctx context.Context) (*eth.ExecutionPayload, error) {
+	d.log.Warn("maods RunNextSequencerAction 1")
 	if onto, buildingID, safe := d.engine.BuildingPayload(); buildingID != (eth.PayloadID{}) {
+		d.log.Warn("maods RunNextSequencerAction 2")
 		if safe {
 			d.log.Warn("avoiding sequencing to not interrupt safe-head changes", "onto", onto, "onto_time", onto.Time)
 			// approximates the worst-case time it takes to build a block, to reattempt sequencing after.
 			d.nextAction = d.timeNow().Add(time.Second * time.Duration(d.config.BlockTime))
 			return nil, nil
 		}
+		d.log.Warn("maods RunNextSequencerAction 3")
 		payload, err := d.CompleteBuildingBlock(ctx)
 		if err != nil {
 			if errors.Is(err, derive.ErrCritical) {

@@ -266,6 +266,7 @@ func (s *Driver) eventLoop() {
 
 		select {
 		case <-sequencerCh:
+			s.log.Warn("maods eventLoop,sequencerCh")
 			payload, err := s.sequencer.RunNextSequencerAction(ctx)
 			if err != nil {
 				s.log.Error("Sequencer critical error", "err", err)
@@ -281,6 +282,7 @@ func (s *Driver) eventLoop() {
 			}
 			planSequencerAction() // schedule the next sequencer action to keep the sequencing looping
 		case <-altSyncTicker.C:
+			s.log.Warn("maods eventLoop,altSyncTicker")
 			// Check if there is a gap in the current unsafe payload queue.
 			ctx, cancel := context.WithTimeout(ctx, time.Second*2)
 			err := s.checkForGapInUnsafeQueue(ctx)
@@ -289,6 +291,7 @@ func (s *Driver) eventLoop() {
 				s.log.Warn("failed to check for unsafe L2 blocks to sync", "err", err)
 			}
 		case payload := <-s.unsafeL2Payloads:
+			s.log.Warn("maods eventLoop,unsafeL2Payloads")
 			s.snapshot("New unsafe payload")
 			s.log.Info("Optimistically queueing unsafe L2 execution payload", "id", payload.ID())
 			s.derivation.AddUnsafePayload(payload)
@@ -296,19 +299,24 @@ func (s *Driver) eventLoop() {
 			reqStep()
 
 		case newL1Head := <-s.l1HeadSig:
+			s.log.Warn("maods eventLoop,newL1Head")
 			s.l1State.HandleNewL1HeadBlock(newL1Head)
 			reqStep() // a new L1 head may mean we have the data to not get an EOF again.
 		case newL1Safe := <-s.l1SafeSig:
+			s.log.Warn("maods eventLoop,newL1Safe")
 			s.l1State.HandleNewL1SafeBlock(newL1Safe)
 			// no step, justified L1 information does not do anything for L2 derivation or status
 		case newL1Finalized := <-s.l1FinalizedSig:
+			s.log.Warn("maods eventLoop,newL1Finalized")
 			s.l1State.HandleNewL1FinalizedBlock(newL1Finalized)
 			s.derivation.Finalize(newL1Finalized)
 			reqStep() // we may be able to mark more L2 data as finalized now
 		case <-delayedStepReq:
+			s.log.Warn("maods eventLoop,delayedStepReq")
 			delayedStepReq = nil
 			step()
 		case <-stepReqCh:
+			s.log.Warn("maods eventLoop,stepReqCh")
 			s.metrics.SetDerivationIdle(false)
 			s.log.Debug("Derivation process step", "onto_origin", s.derivation.Origin(), "attempts", stepAttempts)
 			err := s.derivation.Step(context.Background())
@@ -349,13 +357,16 @@ func (s *Driver) eventLoop() {
 				reqStep() // continue with the next step if we can
 			}
 		case respCh := <-s.stateReq:
+			s.log.Warn("maods eventLoop,respCh")
 			respCh <- struct{}{}
 		case respCh := <-s.forceReset:
+			s.log.Warn("maods eventLoop,forceReset")
 			s.log.Warn("Derivation pipeline is manually reset")
 			s.derivation.Reset()
 			s.metrics.RecordPipelineReset()
 			close(respCh)
 		case resp := <-s.startSequencer:
+			s.log.Warn("maods eventLoop,startSequencer")
 			unsafeHead := s.derivation.UnsafeL2Head().Hash
 			if !s.driverConfig.SequencerStopped {
 				resp.err <- errors.New("sequencer already running")
@@ -372,6 +383,7 @@ func (s *Driver) eventLoop() {
 				planSequencerAction() // resume sequencing
 			}
 		case respCh := <-s.stopSequencer:
+			s.log.Warn("maods eventLoop,stopSequencer")
 			if s.driverConfig.SequencerStopped {
 				respCh <- hashAndError{err: errors.New("sequencer not running")}
 			} else {
@@ -384,8 +396,10 @@ func (s *Driver) eventLoop() {
 				respCh <- hashAndError{hash: s.derivation.UnsafeL2Head().Hash}
 			}
 		case respCh := <-s.sequencerActive:
+			s.log.Warn("maods eventLoop,sequencerActive")
 			respCh <- !s.driverConfig.SequencerStopped
 		case <-s.done:
+			s.log.Warn("maods eventLoop,done")
 			return
 		}
 	}
