@@ -218,11 +218,9 @@ func (s *Driver) eventLoop() {
 		s.log.Warn("maods delay:", delay.String())
 		sequencerCh = sequencerTimer.C
 		if len(sequencerCh) > 0 { // empty if not already drained before resetting
-			s.log.Warn("maods clear sequencerCh")
 			<-sequencerCh
 		}
 		succ := sequencerTimer.Reset(delay)
-		s.log.Warn("maods sequencerTimer.Reset，succ:", succ, ",delay:", delay.String())
 	}
 
 	// Create a ticker to check if there is a gap in the engine queue. Whenever
@@ -248,6 +246,7 @@ func (s *Driver) eventLoop() {
 						"safe_l2", s.derivation.SafeL2Head(),
 						"unsafe_l2", s.derivation.UnsafeL2Head(),
 					)
+					s.log.Warn("maods sequencerCh = nil")
 					sequencerCh = nil
 				}
 			} else if s.sequencer.BuildingOnto().ID() != s.derivation.UnsafeL2Head().ID() {
@@ -255,10 +254,10 @@ func (s *Driver) eventLoop() {
 				// This may adjust at any time based on fork-choice changes or previous errors.
 				//
 				// update sequencer time if the head changed
-				s.log.Warn("maods calling planSequencerAction in for")
 				planSequencerAction()
 			}
 		} else {
+			s.log.Warn("maods sequencerCh = nil")
 			sequencerCh = nil
 		}
 		// If the engine is not ready, or if the L2 head is actively changing, then reset the alt-sync:
