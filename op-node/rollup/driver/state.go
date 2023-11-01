@@ -215,12 +215,14 @@ func (s *Driver) eventLoop() {
 	var sequencerCh <-chan time.Time
 	planSequencerAction := func() {
 		delay := s.sequencer.PlanNextSequencerAction()
-		s.log.Warn("maods delay:",delay.String())
+		s.log.Warn("maods delay:", delay.String())
 		sequencerCh = sequencerTimer.C
 		if len(sequencerCh) > 0 { // empty if not already drained before resetting
+			s.log.Warn("maods clear sequencerCh")
 			<-sequencerCh
 		}
-		sequencerTimer.Reset(delay)
+		succ:=sequencerTimer.Reset(delay)
+		s.log.Warn("maods sequencerTimer.Reset，succ:",succ,",delay:"delay.String())
 	}
 
 	// Create a ticker to check if there is a gap in the engine queue. Whenever
@@ -252,6 +254,7 @@ func (s *Driver) eventLoop() {
 				// This may adjust at any time based on fork-choice changes or previous errors.
 				//
 				// update sequencer time if the head changed
+				s.log.Warn("maods calling planSequencerAction in for")
 				planSequencerAction()
 			}
 		} else {
