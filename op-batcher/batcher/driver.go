@@ -267,7 +267,7 @@ func (l *BatchSubmitter) calculateL2BlockRangeToStore(ctx context.Context) (eth.
 
 	// Check if we should even attempt to load any blocks. TODO: May not need this check
 	if syncStatus.SafeL2.Number >= syncStatus.UnsafeL2.Number {
-		return eth.BlockID{}, eth.BlockID{}, errors.New("L2 safe head ahead of L2 unsafe head")
+		return eth.BlockID{}, eth.BlockID{}, errors.New("L2 safe head ahead of L2 unsafe head,safeL2:", syncStatus.SafeL2.Number.String(), ",UnsafeL2:", syncStatus.UnsafeL2.Number)
 	}
 
 	return l.lastStoredBlock, syncStatus.UnsafeL2.ID(), nil
