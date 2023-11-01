@@ -220,7 +220,7 @@ func (s *Driver) eventLoop() {
 		if len(sequencerCh) > 0 { // empty if not already drained before resetting
 			<-sequencerCh
 		}
-		succ := sequencerTimer.Reset(delay)
+		sequencerTimer.Reset(delay)
 	}
 
 	// Create a ticker to check if there is a gap in the engine queue. Whenever
