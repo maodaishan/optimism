@@ -221,8 +221,8 @@ func (s *Driver) eventLoop() {
 			s.log.Warn("maods clear sequencerCh")
 			<-sequencerCh
 		}
-		succ:=sequencerTimer.Reset(delay)
-		s.log.Warn("maods sequencerTimer.Reset，succ:",succ,",delay:"delay.String())
+		succ := sequencerTimer.Reset(delay)
+		s.log.Warn("maods sequencerTimer.Reset，succ:", succ, ",delay:", delay.String())
 	}
 
 	// Create a ticker to check if there is a gap in the engine queue. Whenever
