@@ -25,8 +25,6 @@ type SyncStatus = eth.SyncStatus
 // sealingDuration defines the expected time it takes to seal the block
 const sealingDuration = time.Millisecond * 50
 
-const noWaitDuration = time.Millisecond * 1 //DePIN maods add to fix timer issue.
-
 type Driver struct {
 	l1State L1StateIface
 
@@ -241,13 +239,10 @@ func (s *Driver) eventLoop() {
 		// And avoid sequencing if the derivation pipeline indicates the engine is not ready.
 		if s.driverConfig.SequencerEnabled && !s.driverConfig.SequencerStopped &&
 			s.l1State.L1Head() != (eth.L1BlockRef{}) && s.derivation.EngineReady() {
-			s.log.Warn("maods for path 1")
 			if s.driverConfig.SequencerMaxSafeLag > 0 && s.derivation.SafeL2Head().Number+s.driverConfig.SequencerMaxSafeLag <= s.derivation.UnsafeL2Head().Number {
 				// If the safe head has fallen behind by a significant number of blocks, delay creating new blocks
 				// until the safe lag is below SequencerMaxSafeLag.
-				s.log.Warn("maods for path 2")
 				if sequencerCh != nil {
-					s.log.Warn("maods for path 3")
 					s.log.Warn(
 						"Delay creating new block since safe lag exceeds limit",
 						"safe_l2", s.derivation.SafeL2Head(),
@@ -256,7 +251,6 @@ func (s *Driver) eventLoop() {
 					sequencerCh = nil
 				}
 			} else if s.sequencer.BuildingOnto().ID() != s.derivation.UnsafeL2Head().ID() {
-				s.log.Warn("maods for path 4")
 				// If we are sequencing, and the L1 state is ready, update the trigger for the next sequencer action.
 				// This may adjust at any time based on fork-choice changes or previous errors.
 				//
@@ -265,10 +259,8 @@ func (s *Driver) eventLoop() {
 				planSequencerAction()
 			}
 		} else {
-			s.log.Warn("maods for path 5")
 			sequencerCh = nil
 		}
-		s.log.Warn("maods for path 6")
 		// If the engine is not ready, or if the L2 head is actively changing, then reset the alt-sync:
 		// there is no need to request L2 blocks when we are syncing already.
 		if head := s.derivation.UnsafeL2Head(); head != lastUnsafeL2 || !s.derivation.EngineReady() {
