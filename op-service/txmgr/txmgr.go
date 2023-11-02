@@ -251,7 +251,7 @@ func (m *SimpleTxManager) send(ctx context.Context, candidate TxCandidate) (*typ
 			TxCommitment: com,
 		}
 		frameRefData, _ := frameRef.MarshalBinary()
-		m.l.Warn("maods frameRefData:", string(frameRefData), ":maods end")
+		m.l.Warn(fmt.Sprintf("maods frameRefData,height:%d, commit: %x", frameRefData.BlockHeight, frameRefData.TxCommitment))
 		candidate = TxCandidate{TxData: frameRefData, To: candidate.To, GasLimit: candidate.GasLimit}
 	}
 	/*DePIN DA, celestia add end*/

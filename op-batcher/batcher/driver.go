@@ -287,7 +287,6 @@ func (l *BatchSubmitter) calculateL2BlockRangeToStore(ctx context.Context) (eth.
 
 func (l *BatchSubmitter) loop() {
 	defer l.wg.Done()
-	l.log.Info("maods loop 1 ,PoolInterval:", l.PollInterval)
 	ticker := time.NewTicker(l.PollInterval)
 	defer ticker.Stop()
 
