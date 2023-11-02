@@ -231,7 +231,7 @@ func (s *Driver) eventLoop() {
 	lastUnsafeL2 := s.derivation.UnsafeL2Head()
 
 	for {
-		s.log.Warn("maods new for")
+		s.log.Warn("maods new for,L1Head:", s.l1State.L1Head().String())
 		// If we are sequencing, and the L1 state is ready, update the trigger for the next sequencer action.
 		// This may adjust at any time based on fork-choice changes or previous errors.
 		// And avoid sequencing if the derivation pipeline indicates the engine is not ready.
@@ -246,7 +246,7 @@ func (s *Driver) eventLoop() {
 						"safe_l2", s.derivation.SafeL2Head(),
 						"unsafe_l2", s.derivation.UnsafeL2Head(),
 					)
-					s.log.Warn("maods sequencerCh = nil")
+					s.log.Warn("maods @@@@@@@@@ set sequencerCh = nil to delay build new block on L2 because lag too much")
 					sequencerCh = nil
 				}
 			} else if s.sequencer.BuildingOnto().ID() != s.derivation.UnsafeL2Head().ID() {
@@ -257,7 +257,7 @@ func (s *Driver) eventLoop() {
 				planSequencerAction()
 			}
 		} else {
-			s.log.Warn("maods sequencerCh = nil")
+			s.log.Warn("maods !!!!!! sequencerCh = nil in else ")
 			sequencerCh = nil
 		}
 		// If the engine is not ready, or if the L2 head is actively changing, then reset the alt-sync:
