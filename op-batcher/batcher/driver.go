@@ -196,7 +196,7 @@ func (l *BatchSubmitter) loadBlocksIntoState(ctx context.Context) error {
 	} else if start.Number >= end.Number {
 		return errors.New("start number is >= end number")
 	}
-	l.log.Info("maods loadBlocksIntoState, start:", start.Number, ",end:", end.Number)
+	l.log.Info(fmt.Sprintf("maods loadBlocksIntoState, start:%d,end:%d", start.Number, end.Number))
 	var latestBlock *types.Block
 	// Add all blocks to "state"
 	for i := start.Number + 1; i < end.Number+1; i++ {
@@ -220,7 +220,7 @@ func (l *BatchSubmitter) loadBlocksIntoState(ctx context.Context) error {
 	}
 
 	l.metr.RecordL2BlocksLoaded(l2ref)
-	l.log.Info("maods loadBlocksIntoState,l2Ref.L1Origin:", l2ref.L1Origin.Number, "l2Ref.sequenceNumber:", l2ref.SequenceNumber)
+	l.log.Info(fmt.Sprintf("maods loadBlocksIntoState,l2Ref.L1Origin:%d,l2Ref.sequenceNumber:%d", l2ref.L1Origin.Number, l2ref.SequenceNumber))
 	return nil
 }
 
